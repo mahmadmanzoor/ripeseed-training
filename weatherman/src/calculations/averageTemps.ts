@@ -1,10 +1,11 @@
 import type { weatherModel } from "../models/weatherModel.js";
 
 export interface MonthlyAverages {
-  avgMaxTemp: number;
-  avgMinTemp: number;
-  avgMeanHumidity: number;
+  avgMaxTemp: number | undefined;
+  avgMinTemp: number | undefined;
+  avgMeanHumidity: number | undefined;
 }
+
 
 export function calculateMonthlyAverages(data: weatherModel[]): MonthlyAverages | undefined {
   if (!data.length) return undefined;
@@ -31,8 +32,8 @@ export function calculateMonthlyAverages(data: weatherModel[]): MonthlyAverages 
   if (maxCount === 0 && minCount === 0 && humidityCount === 0) return undefined;
 
   return {
-    avgMaxTemp: maxCount ? maxSum / maxCount : 0,
-    avgMinTemp: minCount ? minSum / minCount : 0,
-    avgMeanHumidity: humidityCount ? humiditySum / humidityCount : 0
+    avgMaxTemp: maxCount ? maxSum / maxCount : undefined,
+    avgMinTemp: minCount ? minSum / minCount : undefined,
+    avgMeanHumidity: humidityCount ? humiditySum / humidityCount : undefined,
   };
 }

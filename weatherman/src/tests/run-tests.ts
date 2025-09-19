@@ -20,9 +20,10 @@ function ok(msg: string) {
   // averages
   const averages = calculateMonthlyAverages(sample);
   assert(averages !== undefined, "Averages should not be undefined");
-  assert(Math.abs((averages!.avgMaxTemp) - 29) < 1e-9, `avgMaxTemp expected 29, got ${averages!.avgMaxTemp}`);
-  assert(Math.abs((averages!.avgMinTemp) - 19) < 1e-9, `avgMinTemp expected 19, got ${averages!.avgMinTemp}`);
-  assert(Math.abs((averages!.avgMeanHumidity) - 55) < 1e-9, `avgMeanHumidity expected 55, got ${averages!.avgMeanHumidity}`);
+  assert(Math.abs(averages!.avgMaxTemp!) - 29 < 1e-9, `avgMaxTemp expected 29, got ${averages!.avgMaxTemp}`);
+  assert(Math.abs(averages!.avgMinTemp!) - 19 < 1e-9, `avgMinTemp expected 19, got ${averages!.avgMinTemp}`);
+  assert(Math.abs(averages!.avgMeanHumidity!) - 55 < 1e-9, `avgMeanHumidity expected 55, got ${averages!.avgMeanHumidity}`);
+
   ok("calculateMonthlyAverages");
 
   // extremes

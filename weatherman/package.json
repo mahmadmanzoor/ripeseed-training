@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node --enable-source-maps dist/main.js",
-    "dev": "tsx weatherman/src/main.ts"
+    "dev": "tsx src/main.ts",
+    "test": "tsx src/tests/run-tests.ts"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,7 @@
   "devDependencies": {
     "@types/node": "^24.5.2",
     "ts-node": "^10.9.2",
+    "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   }
 }

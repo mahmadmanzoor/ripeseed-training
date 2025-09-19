@@ -1,0 +1,6 @@
+PKT,Max TemperatureC,Mean TemperatureC,Min TemperatureC,Max Humidity,Mean Humidity,Min Humidity
+2004-08-01,23,22,21,68,60,55
+2004-08-02,22,22,20,84,70,60
+2004-08-03,23,21,21,88,65,62
+2004-08-04,22,22,21,88,78,68
+2004-08-05,21,20,19,88,80,70

@@ -12,7 +12,7 @@ Weather Man is a Node.js/TypeScript application that parses daily weather data a
 ## Installation
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/mahmadmanzoor/ripeseed-training.git
 cd ripeseed-training/weatherman
 npm install
 npm run build
@@ -22,16 +22,16 @@ npm run build
 
 ```bash
 # Extreme values for a year
-node dist/main.js ./sample-data -e 2004
+node dist/main.js sample-data -e 2004
 
 # Average values for a month
-node dist/main.js ./sample-data -a 2004/8
+node dist/main.js sample-data -a 2004/8
 
 # Chart report for a month
-node dist/main.js ./sample-data -c 2004/8
+node dist/main.js sample-data -c 2004/8
 
 # Combine multiple reports
-node dist/main.js ./sample-data -e 2004 -a 2004/8 -c 2004/8
+node dist/main.js sample-data -e 2004 -a 2004/8 -c 2004/8
 ```
 
 ## Testing

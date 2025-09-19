@@ -1,4 +1,5 @@
 import type { weatherModel } from "../models/weatherModel.js";
+import { findHottestDay, findColdestDay, findMostHumidDay } from "../calculations/extremeTemps.js";
 
 export interface WeatherReport {
   hottestDay: { date: Date; maxTempC: number } | undefined;
@@ -6,7 +7,10 @@ export interface WeatherReport {
   mostHumidDay: { date: Date; humidity: number } | undefined;
 }
 
-export function generateReport(_data: weatherModel[]): WeatherReport {
-  // TODO: implement report generation logic
-  return { hottestDay: undefined, coldestDay: undefined, mostHumidDay: undefined };
+export function generateReport(data: weatherModel[]): WeatherReport {
+  return {
+    hottestDay: findHottestDay(data),
+    coldestDay: findColdestDay(data),
+    mostHumidDay: findMostHumidDay(data),
+  };
 }

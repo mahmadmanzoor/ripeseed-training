@@ -24,8 +24,8 @@ export function parseWeatherFiles(directoryPath: string): weatherModel[] {
       meanTempC: safeNumber(row["Mean TemperatureC"]),
       minTempC: safeNumber(row["Min TemperatureC"]),
       maxHumidity: safeNumber(row["Max Humidity"]),
-      meanHumidity: safeNumber(row[" Mean Humidity"]),
-      minHumidity: safeNumber(row[" Min Humidity"]),
+      meanHumidity: safeNumber(row["Mean Humidity"]),
+      minHumidity: safeNumber(row["Min Humidity"]),
     }));
 
     allReadings = allReadings.concat(readings);

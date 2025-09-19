@@ -27,9 +27,9 @@ export function findColdestDay(data: weatherModel[]): { date: Date; minTempC: nu
 export function findMostHumidDay(data: weatherModel[]): { date: Date; humidity: number } | undefined {
   let humid: { date: Date; humidity: number } | undefined;
   for (const record of data) {
-    if (record.maxHumidity !== undefined) {
-      if (!humid || record.maxHumidity > humid.humidity) {
-        humid = { date: record.date, humidity: record.maxHumidity };
+    if (record.meanHumidity !== undefined) {
+      if (!humid || record.meanHumidity > humid.humidity) {
+        humid = { date: record.date, humidity: record.meanHumidity };
       }
     }
   }

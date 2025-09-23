@@ -70,8 +70,8 @@ function parseDateSafely(dateString: string): Date {
     // Strategy 4: Final fallback - try parsing as local time
     return new Date(trimmedDate);
   } catch (error) {
-    // Throw a descriptive error instead of returning a fallback date
-    throw new Error(`Failed to parse date: ${dateString}`);
+    // Return an invalid Date so the downstream filter can drop the row
+    return new Date('Invalid Date');
   }
 }
 

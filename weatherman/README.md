@@ -5,6 +5,7 @@ Weather Man is a robust Node.js/TypeScript application that parses daily weather
 ## 🏗️ Architecture
 
 This application follows SOLID principles and clean code practices:
+
 - **Single Responsibility Principle**: Each module has one clear purpose
 - **DRY (Don't Repeat Yourself)**: Eliminated code duplication
 - **Type Safety**: Full TypeScript coverage with proper typing
@@ -52,6 +53,7 @@ npm test
 ```
 
 **Test Coverage:**
+
 - 13+ individual test cases
 - 4 test suites organized by functionality
 - Edge cases and error conditions
@@ -60,7 +62,7 @@ npm test
 
 ## 📁 Project Structure
 
-```
+```text
 src/
 ├── calculations/     # Weather calculation logic
 ├── constants/        # Configuration constants
@@ -93,6 +95,7 @@ npm run test         # Run test suite
 Place CSV/TXT files in `./sample-data` folder. Example file included: `sample-data/sample_Murree_2004_Aug.txt`
 
 **Supported file formats:**
+
 - `.txt` files with CSV data
 - `.csv` files
 - Multiple timezone support (PKT, UTC, GMT, etc.)

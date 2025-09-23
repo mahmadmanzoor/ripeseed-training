@@ -8,7 +8,11 @@
     "build": "tsc",
     "start": "node --enable-source-maps dist/main.js",
     "dev": "tsx src/main.ts",
-    "test": "tsx src/tests/run-tests.ts"
+    "test": "tsx src/tests/weatherCalculationTests.ts",
+    "clean": "rm -rf dist",
+    "rebuild": "npm run clean && npm run build",
+    "lint": "echo 'No linter configured'",
+    "format": "echo 'No formatter configured'"
   },
   "repository": {
     "type": "git",

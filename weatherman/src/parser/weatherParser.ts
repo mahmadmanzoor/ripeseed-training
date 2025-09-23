@@ -12,16 +12,9 @@ import type { WeatherRecord } from "../models/weatherRecord.js";
 
 /**
  * CSV row type definition matching the expected column structure
+ * Simple Record type that allows any string key with string | undefined values
  */
-interface CsvRow {
-  [WEATHER_DATA_COLUMNS.DATE]: string;
-  [WEATHER_DATA_COLUMNS.MAXIMUM_TEMPERATURE_CELSIUS]: string | undefined;
-  [WEATHER_DATA_COLUMNS.MINIMUM_TEMPERATURE_CELSIUS]: string | undefined;
-  [WEATHER_DATA_COLUMNS.MEAN_TEMPERATURE_CELSIUS]: string | undefined;
-  [WEATHER_DATA_COLUMNS.MAXIMUM_HUMIDITY]: string | undefined;
-  [WEATHER_DATA_COLUMNS.MINIMUM_HUMIDITY]: string | undefined;
-  [WEATHER_DATA_COLUMNS.MEAN_HUMIDITY]: string | undefined;
-}
+type CsvRow = Record<string, string | undefined>;
 
 /**
  * Parses weather values with null for missing data
@@ -128,8 +121,8 @@ export function parseWeatherFiles(directoryPath: string): WeatherRecord[] {
         };
       })
       // Filter out records with invalid dates or no valid data at all
-      .filter((weatherRecord): weatherRecord is WeatherRecord => 
-        !isNaN(weatherRecord.date.getTime()) && hasValidData(weatherRecord)
+      .filter((weatherRecord): weatherRecord is WeatherRecord =>
+        !Number.isNaN(weatherRecord.date.getTime()) && hasValidData(weatherRecord)
       );
 
     // Combine records from all files

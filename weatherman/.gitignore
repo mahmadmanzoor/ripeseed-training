@@ -136,14 +136,11 @@ local.properties
 logs
 *.log
 
-# Weather data files (as per feedback)
-*.txt
-sample-data/
+# Weather data files
+# Ignore bulk data under a dedicated folder, but keep sample data tracked
+data/**/*.txt
+!sample-data/**
 
 # Build output
 dist/
 build/
-*.js
-*.js.map
-*.d.ts
-*.d.ts.map

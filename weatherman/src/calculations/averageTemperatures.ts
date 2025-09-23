@@ -21,17 +21,33 @@ export function calculateMonthlyAverages(weatherRecords: WeatherRecord[]): Month
   if (!weatherRecords.length) return undefined;
 
   // Use functional programming to calculate sums and counts
+  // Filter based on reasonable bounds: temperature between -100°C and 60°C, humidity between 0% and 100%
   const validMaxTemps = weatherRecords
-    .filter(record => record.maximumTemperatureCelsius !== 0)
-    .map(record => record.maximumTemperatureCelsius);
+    .filter(record => 
+      record.maximumTemperatureCelsius != null && 
+      Number.isFinite(record.maximumTemperatureCelsius) &&
+      record.maximumTemperatureCelsius >= -100 && 
+      record.maximumTemperatureCelsius <= 60
+    )
+    .map(record => record.maximumTemperatureCelsius!);
   
   const validMinTemps = weatherRecords
-    .filter(record => record.minimumTemperatureCelsius !== 0)
-    .map(record => record.minimumTemperatureCelsius);
+    .filter(record => 
+      record.minimumTemperatureCelsius != null && 
+      Number.isFinite(record.minimumTemperatureCelsius) &&
+      record.minimumTemperatureCelsius >= -100 && 
+      record.minimumTemperatureCelsius <= 60
+    )
+    .map(record => record.minimumTemperatureCelsius!);
   
   const validHumidity = weatherRecords
-    .filter(record => record.meanHumidity !== 50)
-    .map(record => record.meanHumidity);
+    .filter(record => 
+      record.meanHumidity != null && 
+      Number.isFinite(record.meanHumidity) &&
+      record.meanHumidity >= 0 && 
+      record.meanHumidity <= 100
+    )
+    .map(record => record.meanHumidity!);
 
   const maximumTemperatureSum = validMaxTemps.reduce((sum, temp) => sum + temp, 0);
   const maximumTemperatureCount = validMaxTemps.length;
@@ -47,10 +63,10 @@ export function calculateMonthlyAverages(weatherRecords: WeatherRecord[]): Month
     return undefined;
   }
 
-  // Calculate averages, using defaults for missing data
+  // Calculate averages, using NaN for missing data to indicate no valid data available
   return {
-    averageMaximumTemperature: maximumTemperatureCount > 0 ? maximumTemperatureSum / maximumTemperatureCount : 0,
-    averageMinimumTemperature: minimumTemperatureCount > 0 ? minimumTemperatureSum / minimumTemperatureCount : 0,
-    averageMeanHumidity: humidityCount > 0 ? humiditySum / humidityCount : 50,
+    averageMaximumTemperature: maximumTemperatureCount > 0 ? maximumTemperatureSum / maximumTemperatureCount : NaN,
+    averageMinimumTemperature: minimumTemperatureCount > 0 ? minimumTemperatureSum / minimumTemperatureCount : NaN,
+    averageMeanHumidity: humidityCount > 0 ? humiditySum / humidityCount : NaN,
   };
 }

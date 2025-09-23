@@ -143,13 +143,13 @@ function displayAverageValueReport(year: number, monthString: string, monthWeath
     if (!monthlyAverages) {
       console.log(ERROR_MESSAGES.NO_AVERAGES_CALCULATED);
     } else {
-      const highestAverage = monthlyAverages.averageMaximumTemperature !== 0 
+      const highestAverage = !isNaN(monthlyAverages.averageMaximumTemperature) 
         ? Math.round(monthlyAverages.averageMaximumTemperature) + DISPLAY_CONSTANTS.CELSIUS_SUFFIX 
         : "N/A";
-      const lowestAverage = monthlyAverages.averageMinimumTemperature !== 0 
+      const lowestAverage = !isNaN(monthlyAverages.averageMinimumTemperature) 
         ? Math.round(monthlyAverages.averageMinimumTemperature) + DISPLAY_CONSTANTS.CELSIUS_SUFFIX 
         : "N/A";
-      const averageHumidity = monthlyAverages.averageMeanHumidity !== 50 
+      const averageHumidity = !isNaN(monthlyAverages.averageMeanHumidity) 
         ? Math.round(monthlyAverages.averageMeanHumidity) + DISPLAY_CONSTANTS.PERCENTAGE_SUFFIX 
         : "N/A";
 

@@ -11,21 +11,35 @@ import { WEATHER_DATA_COLUMNS, DATE_PARSING, FILE_PROCESSING } from "../constant
 import type { WeatherRecord } from "../models/weatherRecord.js";
 
 /**
- * Parses weather values with intelligent defaults based on data type
+ * CSV row type definition matching the expected column structure
  */
-function parseWeatherValue(value: string | undefined, type: 'temperature' | 'humidity'): number {
-  return !value?.trim() || Number.isNaN(Number(value.trim())) 
-    ? (type === 'temperature' ? 0 : 50) 
-    : Number(value.trim());
+interface CsvRow {
+  [WEATHER_DATA_COLUMNS.DATE]: string;
+  [WEATHER_DATA_COLUMNS.MAXIMUM_TEMPERATURE_CELSIUS]: string | undefined;
+  [WEATHER_DATA_COLUMNS.MINIMUM_TEMPERATURE_CELSIUS]: string | undefined;
+  [WEATHER_DATA_COLUMNS.MEAN_TEMPERATURE_CELSIUS]: string | undefined;
+  [WEATHER_DATA_COLUMNS.MAXIMUM_HUMIDITY]: string | undefined;
+  [WEATHER_DATA_COLUMNS.MINIMUM_HUMIDITY]: string | undefined;
+  [WEATHER_DATA_COLUMNS.MEAN_HUMIDITY]: string | undefined;
 }
 
 /**
- * Checks if a weather record has valid data (not all default values)
+ * Parses weather values with null for missing data
+ */
+function parseWeatherValue(value: string | undefined, type: 'temperature' | 'humidity'): number | null {
+  if (!value?.trim() || Number.isNaN(Number(value.trim()))) {
+    return null; // Return null for missing/invalid data
+  }
+  return Number(value.trim());
+}
+
+/**
+ * Checks if a weather record has valid data (not all null values)
  */
 function hasValidData(record: WeatherRecord): boolean {
-  return record.maximumTemperatureCelsius !== 0 ||
-         record.minimumTemperatureCelsius !== 0 ||
-         record.meanHumidity !== 50;
+  return record.maximumTemperatureCelsius != null ||
+         record.minimumTemperatureCelsius != null ||
+         record.meanHumidity != null;
 }
 
 /**
@@ -63,14 +77,15 @@ function parseDateSafely(dateString: string): Date {
     // Strategy 4: Final fallback - try parsing as local time
     return new Date(trimmedDate);
   } catch (error) {
-    // Strategy 5: Ultimate fallback - return current date with warning
-    console.warn(`Failed to parse date: ${dateString}. Using current date as fallback.`);
-    return new Date();
+    // Throw a descriptive error instead of returning a fallback date
+    throw new Error(`Failed to parse date: ${dateString}`);
   }
 }
 
 /**
  * Parses all supported weather data files from a directory
+ * @param directoryPath - Path to the directory containing weather data files
+ * @returns Array of WeatherRecord objects. Returns empty array if directory doesn't exist or contains no valid files
  */
 export function parseWeatherFiles(directoryPath: string): WeatherRecord[] {
   // Resolve the directory path to handle relative paths
@@ -88,19 +103,19 @@ export function parseWeatherFiles(directoryPath: string): WeatherRecord[] {
     const csvRecords = parse(fileContent, FILE_PROCESSING.CSV_OPTIONS);
 
     // Transform CSV rows into WeatherRecord objects
-    const weatherRecords: WeatherRecord[] = csvRecords
-      .map((csvRow: any): WeatherRecord => {
+    const weatherRecords: WeatherRecord[] = (csvRecords as CsvRow[])
+      .map((csvRow: CsvRow): WeatherRecord => {
         // Parse all values with intelligent defaults
         const maximumHumidity = parseWeatherValue(csvRow[WEATHER_DATA_COLUMNS.MAXIMUM_HUMIDITY], 'humidity');
         const minimumHumidity = parseWeatherValue(csvRow[WEATHER_DATA_COLUMNS.MINIMUM_HUMIDITY], 'humidity');
         const meanHumidity = parseWeatherValue(csvRow[WEATHER_DATA_COLUMNS.MEAN_HUMIDITY], 'humidity');
 
-        // Business logic: calculate mean humidity from max/min if mean is default value
-        const finalMeanHumidity = meanHumidity !== 50 
+        // Business logic: calculate mean humidity from max/min if mean is null
+        const finalMeanHumidity = meanHumidity != null 
           ? meanHumidity 
-          : (maximumHumidity !== 50 && minimumHumidity !== 50)
+          : (maximumHumidity != null && minimumHumidity != null)
             ? (maximumHumidity + minimumHumidity) / 2 
-            : 50;
+            : null;
 
         return {
           date: parseDateSafely(String(csvRow[WEATHER_DATA_COLUMNS.DATE])),

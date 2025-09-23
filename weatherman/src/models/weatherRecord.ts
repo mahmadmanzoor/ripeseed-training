@@ -6,18 +6,18 @@
  * Temperature-related weather data interface
  */
 export interface TemperatureData {
-  maximumTemperatureCelsius: number;
-  minimumTemperatureCelsius: number;
-  meanTemperatureCelsius: number;
+  maximumTemperatureCelsius: number | null;
+  minimumTemperatureCelsius: number | null;
+  meanTemperatureCelsius: number | null;
 }
 
 /**
  * Humidity-related weather data interface
  */
 export interface HumidityData {
-  maximumHumidity: number;
-  meanHumidity: number;
-  minimumHumidity: number;
+  maximumHumidity: number | null;
+  meanHumidity: number | null;
+  minimumHumidity: number | null;
 }
 
 /**

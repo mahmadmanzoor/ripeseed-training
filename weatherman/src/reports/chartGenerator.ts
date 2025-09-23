@@ -1,6 +1,6 @@
 import chalk from "chalk";
 
-import { CHART_CONSTANTS, DISPLAY_CONSTANTS } from "../constants/weatherConstants.js";
+import { CHART_CONSTANTS, DISPLAY_CONSTANTS, ERROR_MESSAGES } from "../constants/weatherConstants.js";
 import type { WeatherRecord } from "../models/weatherRecord.js";
 
 export function generateChartReport(weatherRecords: WeatherRecord[], year: number, month: number): void {
@@ -28,10 +28,10 @@ function calculateTemperatureRange(weatherRecords: WeatherRecord[]): { minimum: 
   let maximumTemperature = -Infinity;
   
   for (const weatherRecord of weatherRecords) {
-    if (weatherRecord.maximumTemperatureCelsius !== 0) {
+    if (weatherRecord.maximumTemperatureCelsius != null) {
       maximumTemperature = Math.max(maximumTemperature, weatherRecord.maximumTemperatureCelsius);
     }
-    if (weatherRecord.minimumTemperatureCelsius !== 0) {
+    if (weatherRecord.minimumTemperatureCelsius != null) {
       minimumTemperature = Math.min(minimumTemperature, weatherRecord.minimumTemperatureCelsius);
     }
   }
@@ -49,12 +49,12 @@ function formatDayNumber(day: number): string {
 }
 
 function hasTemperatureData(weatherRecord: WeatherRecord): boolean {
-  return weatherRecord.maximumTemperatureCelsius !== 0 || 
-         weatherRecord.minimumTemperatureCelsius !== 0;
+  return weatherRecord.maximumTemperatureCelsius != null || 
+         weatherRecord.minimumTemperatureCelsius != null;
 }
 
 function displayNoDataMessage(formattedDay: string): void {
-  console.log(`${formattedDay} ${DISPLAY_CONSTANTS.NO_DATA_AVAILABLE_TEXT}`);
+  console.log(`${formattedDay} ${ERROR_MESSAGES.NO_DATA_AVAILABLE}`);
 }
 
 function displayTemperatureBars(
@@ -62,11 +62,11 @@ function displayTemperatureBars(
   temperatureRange: { minimum: number; maximum: number }, 
   formattedDay: string
 ): void {
-  if (weatherRecord.maximumTemperatureCelsius !== 0) {
+  if (weatherRecord.maximumTemperatureCelsius != null) {
     displayMaximumTemperatureBar(weatherRecord.maximumTemperatureCelsius, temperatureRange, formattedDay);
   }
   
-  if (weatherRecord.minimumTemperatureCelsius !== 0) {
+  if (weatherRecord.minimumTemperatureCelsius != null) {
     displayMinimumTemperatureBar(weatherRecord.minimumTemperatureCelsius, temperatureRange, formattedDay);
   }
 }
@@ -143,8 +143,8 @@ function renderChart(
 }
 
 function hasCompleteTemperatureData(weatherRecord: WeatherRecord): boolean {
-  return weatherRecord.minimumTemperatureCelsius !== 0 && 
-         weatherRecord.maximumTemperatureCelsius !== 0;
+  return weatherRecord.minimumTemperatureCelsius != null && 
+         weatherRecord.maximumTemperatureCelsius != null;
 }
 
 function displayCombinedTemperatureBars(
@@ -152,8 +152,14 @@ function displayCombinedTemperatureBars(
   temperatureRange: { minimum: number; maximum: number }, 
   formattedDay: string
 ): void {
-  const minimumBarLength = calculateBarLength(weatherRecord.minimumTemperatureCelsius!, temperatureRange);
-  const maximumBarLength = calculateBarLength(weatherRecord.maximumTemperatureCelsius!, temperatureRange);
+  // Validate that both temperature values are available before proceeding
+  if (weatherRecord.minimumTemperatureCelsius == null || weatherRecord.maximumTemperatureCelsius == null) {
+    displayNoDataMessage(formattedDay);
+    return;
+  }
+  
+  const minimumBarLength = calculateBarLength(weatherRecord.minimumTemperatureCelsius, temperatureRange);
+  const maximumBarLength = calculateBarLength(weatherRecord.maximumTemperatureCelsius, temperatureRange);
   
   const minimumBar = "+".repeat(minimumBarLength);
   const maximumBar = "+".repeat(maximumBarLength);

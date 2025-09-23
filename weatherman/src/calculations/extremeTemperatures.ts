@@ -34,6 +34,13 @@ type ExtremeResult =
   | { date: Date; humidity: number }
   | undefined;
 
+// Type for tracking extreme records during iteration
+type TemperatureRecord = 
+  | { date: Date; maximumTemperatureCelsius: number }
+  | { date: Date; minimumTemperatureCelsius: number }
+  | { date: Date; humidity: number }
+  | undefined;
+
 /**
  * Generic function to find extreme values - eliminates code duplication
  */
@@ -42,7 +49,7 @@ function findExtremeValue(
   extremeType: ExtremeType, 
   valueType: ValueType
 ): ExtremeResult {
-  let extremeRecord: any;
+  let extremeRecord: TemperatureRecord = undefined;
   
   // Iterate through all weather records to find the extreme value
   for (const weatherRecord of weatherRecords) {
@@ -52,30 +59,42 @@ function findExtremeValue(
     // Determine which property to examine based on value type
     if (valueType === 'temperature') {
       if (extremeType === 'maximum') {
-        currentValue = weatherRecord.maximumTemperatureCelsius;
+        currentValue = weatherRecord.maximumTemperatureCelsius ?? NaN;
         propertyName = 'maximumTemperatureCelsius';
       } else {
-        currentValue = weatherRecord.minimumTemperatureCelsius;
+        currentValue = weatherRecord.minimumTemperatureCelsius ?? NaN;
         propertyName = 'minimumTemperatureCelsius';
       }
     } else {
       // For humidity, we always look for maximum (most humid)
-      currentValue = weatherRecord.meanHumidity;
+      currentValue = weatherRecord.meanHumidity ?? NaN;
       propertyName = 'humidity';
     }
     
-    // Only process records with non-default values
-    const isValidTemperature = valueType === 'temperature' && currentValue !== 0;
-    const isValidHumidity = valueType === 'humidity' && currentValue !== 50;
+    // Only process records with valid values (finite numbers within reasonable bounds)
+    const isValidTemperature = valueType === 'temperature' && 
+      currentValue != null && 
+      Number.isFinite(currentValue) &&
+      currentValue >= -100 && 
+      currentValue <= 60;
+    const isValidHumidity = valueType === 'humidity' && 
+      currentValue != null && 
+      Number.isFinite(currentValue) &&
+      currentValue >= 0 && 
+      currentValue <= 100;
     
     if (isValidTemperature || isValidHumidity) {
       // Check if this record should become the new extreme
       // For maximum: current > existing, for minimum: current < existing
-      const shouldUpdate = !extremeRecord || 
-        (extremeType === 'maximum' ? currentValue > extremeRecord[propertyName] : currentValue < extremeRecord[propertyName]);
+      let shouldUpdate = !extremeRecord;
+      
+      if (extremeRecord && propertyName in extremeRecord) {
+        const existingValue = (extremeRecord as any)[propertyName];
+        shouldUpdate = extremeType === 'maximum' ? currentValue > existingValue : currentValue < existingValue;
+      }
         
       if (shouldUpdate) {
-        extremeRecord = { date: weatherRecord.date, [propertyName]: currentValue };
+        extremeRecord = { date: weatherRecord.date, [propertyName]: currentValue } as TemperatureRecord;
       }
     }
   }

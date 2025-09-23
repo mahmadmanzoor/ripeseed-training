@@ -55,7 +55,6 @@ export const ERROR_MESSAGES = {
 export const DISPLAY_CONSTANTS = {
   CELSIUS_SUFFIX: "C",
   PERCENTAGE_SUFFIX: "%",
-  NO_DATA_AVAILABLE_TEXT: "No data available",
   USAGE_MESSAGE: "Usage: node dist/main.js <data-dir> [-e <year>] [-a <year/month>] [-c <year/month>]"
 } as const;
 

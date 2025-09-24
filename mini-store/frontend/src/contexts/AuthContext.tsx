@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import type { User } from '../types/auth';
@@ -12,6 +12,7 @@ interface AuthContextType {
   register: (email: string, password: string) => Promise<any>;
   logout: () => void;
   updateUserWalletBalance: (newBalance: number) => void;
+  purchaseProduct: (productId: number, quantity: number) => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,7 +29,7 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider = ({ children }: AuthProviderProps) => {
   const auth = useAuth();
 
   const contextValue: AuthContextType = {
@@ -44,6 +45,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     },
     logout: auth.logout,
     updateUserWalletBalance: auth.updateUserWalletBalance,
+    purchaseProduct: auth.purchaseProduct,
   };
 
   return (

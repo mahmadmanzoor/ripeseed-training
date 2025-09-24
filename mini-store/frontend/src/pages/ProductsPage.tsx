@@ -1,21 +1,67 @@
 import { useState } from 'react';
 import { useProducts, useProductCategories } from '../hooks/useProducts';
+import { useAuthContext } from '../contexts/AuthContext';
 import ProductGrid from '../components/ProductGrid';
 import SearchAndFilter from '../components/SearchAndFilter';
+import PurchaseModal from '../components/PurchaseModal';
 import type { Product, ProductFilters } from '../types/product';
 
 const ProductsPage = () => {
   const [filters, setFilters] = useState<ProductFilters>({});
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+  const [purchaseLoading, setPurchaseLoading] = useState(false);
+  const [purchaseMessage, setPurchaseMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  
   const { products, loading, error, total } = useProducts(filters);
   const { categories, loading: categoriesLoading } = useProductCategories();
+  const { user, purchaseProduct } = useAuthContext();
 
   const handleFiltersChange = (newFilters: ProductFilters) => {
     setFilters(newFilters);
   };
 
   const handlePurchase = (product: Product) => {
-    // TODO: Implement purchase functionality in Step 5
-    alert(`Purchase functionality will be implemented in Step 5!\n\nProduct: ${product.title}\nPrice: $${(product.price - (product.price * product.discountPercentage) / 100).toFixed(2)}`);
+    if (!user) {
+      setPurchaseMessage({ type: 'error', text: 'Please login to purchase products' });
+      return;
+    }
+    
+    setSelectedProduct(product);
+    setIsPurchaseModalOpen(true);
+    setPurchaseMessage(null);
+  };
+
+  const handlePurchaseConfirm = async (product: Product, quantity: number) => {
+    try {
+      setPurchaseLoading(true);
+      setPurchaseMessage(null);
+
+      const result = await purchaseProduct(product.id, quantity);
+      
+      setPurchaseMessage({ 
+        type: 'success', 
+        text: `Successfully purchased ${quantity}x ${product.title} for $${result.order.totalAmount.toFixed(2)}!` 
+      });
+      
+      setIsPurchaseModalOpen(false);
+      setSelectedProduct(null);
+      
+      // Clear success message after 5 seconds
+      setTimeout(() => setPurchaseMessage(null), 5000);
+      
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || 'Purchase failed. Please try again.';
+      setPurchaseMessage({ type: 'error', text: errorMessage });
+    } finally {
+      setPurchaseLoading(false);
+    }
+  };
+
+  const handleClosePurchaseModal = () => {
+    setIsPurchaseModalOpen(false);
+    setSelectedProduct(null);
+    setPurchaseMessage(null);
   };
 
   return (
@@ -26,16 +72,11 @@ const ProductsPage = () => {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                🛍️ Product Catalog
+                🛍️ Mini Store
               </h1>
               <p className="text-gray-600 mt-2 text-lg">
                 {loading ? 'Loading amazing products...' : `${total} products found`}
               </p>
-            </div>
-            <div className="bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
-              <div className="text-sm text-blue-600 font-medium">
-                ⚡ Powered by DummyJSON API
-              </div>
             </div>
           </div>
         </div>
@@ -110,7 +151,44 @@ const ProductsPage = () => {
             </p>
           </div>
         )}
+
+        {/* Purchase Success/Error Message */}
+        {purchaseMessage && (
+          <div className={`fixed top-4 right-4 z-50 max-w-md p-4 rounded-lg shadow-lg ${
+            purchaseMessage.type === 'success' 
+              ? 'bg-green-50 border border-green-200 text-green-800' 
+              : 'bg-red-50 border border-red-200 text-red-800'
+          }`}>
+            <div className="flex items-center">
+              <div className="mr-3">
+                {purchaseMessage.type === 'success' ? '✅' : '❌'}
+              </div>
+              <div>
+                <p className="font-medium">{purchaseMessage.text}</p>
+              </div>
+              <button
+                onClick={() => setPurchaseMessage(null)}
+                className="ml-4 text-gray-400 hover:text-gray-600"
+              >
+                <span className="sr-only">Close</span>
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Purchase Modal */}
+      <PurchaseModal
+        product={selectedProduct}
+        isOpen={isPurchaseModalOpen}
+        onClose={handleClosePurchaseModal}
+        onConfirm={handlePurchaseConfirm}
+        currentWalletBalance={user?.walletBalance || 0}
+        isLoading={purchaseLoading}
+      />
     </div>
   );
 };

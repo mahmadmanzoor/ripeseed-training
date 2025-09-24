@@ -60,7 +60,7 @@ const HomePage = () => {
                 Browse Products
               </a>
               <div className="bg-green-100 px-4 py-2 rounded-lg">
-                <span className="text-sm text-green-800">Wallet Balance</span>
+                <span className="text-sm text-green-800">💰 Wallet Balance</span>
                 <p className="text-lg font-semibold text-green-900">
                   ${Number(user?.walletBalance || 0).toFixed(2)}
                 </p>

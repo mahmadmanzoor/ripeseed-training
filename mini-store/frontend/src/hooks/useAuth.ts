@@ -104,11 +104,34 @@ export const useAuth = () => {
     }
   };
 
+  const purchaseProduct = async (productId: number, quantity: number = 1) => {
+    try {
+      const response = await apiClient.post('/auth/purchase', {
+        productId,
+        quantity
+      });
+
+      const { user: updatedUser } = response.data;
+
+      // Update user data in localStorage and state
+      localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
+      setAuthState(prev => ({
+        ...prev,
+        user: updatedUser,
+      }));
+
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   return {
     ...authState,
     login,
     register,
     logout,
     updateUserWalletBalance,
+    purchaseProduct,
   };
 };

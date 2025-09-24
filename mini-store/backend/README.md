@@ -5,10 +5,12 @@ Backend API for the Mini Store application built with Node.js, Express, TypeScri
 ## Setup Instructions
 
 ### Prerequisites
+
 - Node.js v18+
 - PostgreSQL database running locally
 
 ### Environment Variables
+
 Create a `.env` file in the backend directory with:
 
 ```env
@@ -19,22 +21,26 @@ PORT=3000
 
 ### Installation & Setup
 
-1. Install dependencies:
+1.Install dependencies:
+
 ```bash
 npm install
 ```
 
-2. Generate Prisma client:
+2.Generate Prisma client:
+
 ```bash
 npm run db:generate
 ```
 
-3. Push database schema:
+3.Push database schema:
+
 ```bash
 npm run db:push
 ```
 
-4. Start development server:
+4.Start development server:
+
 ```bash
 npm run dev
 ```
@@ -42,11 +48,13 @@ npm run dev
 ## API Endpoints
 
 ### Authentication
+
 - `POST /api/auth/register` - Register new user
 - `POST /api/auth/login` - Login user
 - `GET /health` - Health check
 
 ### Example Registration
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/register \
   -H "Content-Type: application/json" \
@@ -54,6 +62,7 @@ curl -X POST http://localhost:3000/api/auth/register \
 ```
 
 ### Example Login
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \

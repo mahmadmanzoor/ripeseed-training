@@ -53,6 +53,12 @@ const HomePage = () => {
               <p className="text-gray-600">Welcome back, {user?.email}!</p>
             </div>
             <div className="flex items-center space-x-4">
+              <a
+                href="/products"
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+              >
+                Browse Products
+              </a>
               <div className="bg-green-100 px-4 py-2 rounded-lg">
                 <span className="text-sm text-green-800">Wallet Balance</span>
                 <p className="text-lg font-semibold text-green-900">
@@ -81,9 +87,12 @@ const HomePage = () => {
             <p className="text-gray-600 mb-4">
               Discover amazing products from our collection
             </p>
-            <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
+            <a
+              href="/products"
+              className="block w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors text-center"
+            >
               View Products
-            </button>
+            </a>
           </div>
 
           {/* Orders Card */}

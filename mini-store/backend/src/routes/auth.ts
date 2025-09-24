@@ -45,7 +45,7 @@ router.post('/register', async (request, response) => {
       user: {
         id: newUser.id,
         email: newUser.email,
-        walletBalance: newUser.walletBalance
+        walletBalance: Number(newUser.walletBalance)
       }
     });
   } catch (error) {
@@ -91,7 +91,7 @@ router.post('/login', async (request, response) => {
       user: {
         id: user.id,
         email: user.email,
-        walletBalance: user.walletBalance
+        walletBalance: Number(user.walletBalance)
       }
     });
   } catch (error) {

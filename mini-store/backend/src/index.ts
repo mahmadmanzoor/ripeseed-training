@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
 
@@ -9,6 +10,10 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Middleware
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:5174'], // Allow frontend ports
+  credentials: true,
+}));
 app.use(express.json());
 
 // Routes

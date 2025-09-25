@@ -13,6 +13,7 @@ interface AuthContextType {
   logout: () => void;
   updateUserWalletBalance: (newBalance: number) => void;
   purchaseProduct: (productId: number, quantity: number) => Promise<any>;
+  giftProduct: (productId: number, quantity: number, recipientEmail: string, message?: string) => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -46,6 +47,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     logout: auth.logout,
     updateUserWalletBalance: auth.updateUserWalletBalance,
     purchaseProduct: auth.purchaseProduct,
+    giftProduct: auth.giftProduct,
   };
 
   return (

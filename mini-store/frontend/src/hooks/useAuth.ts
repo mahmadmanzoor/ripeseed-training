@@ -126,6 +126,30 @@ export const useAuth = () => {
     }
   };
 
+  const giftProduct = async (productId: number, quantity: number, recipientEmail: string, message?: string) => {
+    try {
+      const response = await apiClient.post('/auth/gift', {
+        productId,
+        quantity,
+        recipientEmail,
+        message
+      });
+
+      const { sender: updatedSender } = response.data;
+
+      // Update user data in localStorage and state
+      localStorage.setItem(USER_KEY, JSON.stringify(updatedSender));
+      setAuthState(prev => ({
+        ...prev,
+        user: updatedSender,
+      }));
+
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   return {
     ...authState,
     login,
@@ -133,5 +157,6 @@ export const useAuth = () => {
     logout,
     updateUserWalletBalance,
     purchaseProduct,
+    giftProduct,
   };
 };

@@ -6,9 +6,10 @@ interface ProductGridProps {
   loading?: boolean;
   error?: string | null;
   onPurchase?: (product: Product) => void;
+  onGift?: (product: Product) => void;
 }
 
-const ProductGrid = ({ products, loading, error, onPurchase }: ProductGridProps) => {
+const ProductGrid = ({ products, loading, error, onPurchase, onGift }: ProductGridProps) => {
   if (loading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -75,6 +76,7 @@ const ProductGrid = ({ products, loading, error, onPurchase }: ProductGridProps)
           key={product.id}
           product={product}
           onPurchase={onPurchase}
+          onGift={onGift}
         />
       ))}
     </div>

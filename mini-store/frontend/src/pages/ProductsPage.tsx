@@ -4,18 +4,22 @@ import { useAuthContext } from '../contexts/AuthContext';
 import ProductGrid from '../components/ProductGrid';
 import SearchAndFilter from '../components/SearchAndFilter';
 import PurchaseModal from '../components/PurchaseModal';
+import GiftModal from '../components/GiftModal';
 import type { Product, ProductFilters } from '../types/product';
 
 const ProductsPage = () => {
   const [filters, setFilters] = useState<ProductFilters>({});
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+  const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
   const [purchaseLoading, setPurchaseLoading] = useState(false);
+  const [giftLoading, setGiftLoading] = useState(false);
   const [purchaseMessage, setPurchaseMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [giftMessage, setGiftMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   
   const { products, loading, error, total } = useProducts(filters);
   const { categories, loading: categoriesLoading } = useProductCategories();
-  const { user, purchaseProduct } = useAuthContext();
+  const { user, purchaseProduct, giftProduct } = useAuthContext();
 
   const handleFiltersChange = (newFilters: ProductFilters) => {
     setFilters(newFilters);
@@ -30,6 +34,17 @@ const ProductsPage = () => {
     setSelectedProduct(product);
     setIsPurchaseModalOpen(true);
     setPurchaseMessage(null);
+  };
+
+  const handleGift = (product: Product) => {
+    if (!user) {
+      setGiftMessage({ type: 'error', text: 'Please login to send gifts' });
+      return;
+    }
+    
+    setSelectedProduct(product);
+    setIsGiftModalOpen(true);
+    setGiftMessage(null);
   };
 
   const handlePurchaseConfirm = async (product: Product, quantity: number) => {
@@ -58,10 +73,42 @@ const ProductsPage = () => {
     }
   };
 
+  const handleGiftConfirm = async (product: Product, quantity: number, recipientEmail: string, message?: string) => {
+    try {
+      setGiftLoading(true);
+      setGiftMessage(null);
+
+      const result = await giftProduct(product.id, quantity, recipientEmail, message);
+      
+      setGiftMessage({ 
+        type: 'success', 
+        text: `🎁 Gift sent successfully to ${recipientEmail}! ${quantity}x ${product.title} for $${result.gift.totalAmount.toFixed(2)}` 
+      });
+      
+      setIsGiftModalOpen(false);
+      setSelectedProduct(null);
+      
+      // Clear success message after 7 seconds
+      setTimeout(() => setGiftMessage(null), 7000);
+      
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || 'Gift sending failed. Please try again.';
+      setGiftMessage({ type: 'error', text: errorMessage });
+    } finally {
+      setGiftLoading(false);
+    }
+  };
+
   const handleClosePurchaseModal = () => {
     setIsPurchaseModalOpen(false);
     setSelectedProduct(null);
     setPurchaseMessage(null);
+  };
+
+  const handleCloseGiftModal = () => {
+    setIsGiftModalOpen(false);
+    setSelectedProduct(null);
+    setGiftMessage(null);
   };
 
   return (
@@ -141,6 +188,7 @@ const ProductsPage = () => {
           loading={loading}
           error={error}
           onPurchase={handlePurchase}
+          onGift={handleGift}
         />
 
         {/* Results Summary */}
@@ -178,6 +226,33 @@ const ProductsPage = () => {
             </div>
           </div>
         )}
+
+        {/* Gift Success/Error Message */}
+        {giftMessage && (
+          <div className={`fixed top-20 right-4 z-50 max-w-md p-4 rounded-lg shadow-lg ${
+            giftMessage.type === 'success' 
+              ? 'bg-purple-50 border border-purple-200 text-purple-800' 
+              : 'bg-red-50 border border-red-200 text-red-800'
+          }`}>
+            <div className="flex items-center">
+              <div className="mr-3">
+                {giftMessage.type === 'success' ? '🎁' : '❌'}
+              </div>
+              <div>
+                <p className="font-medium">{giftMessage.text}</p>
+              </div>
+              <button
+                onClick={() => setGiftMessage(null)}
+                className="ml-4 text-gray-400 hover:text-gray-600"
+              >
+                <span className="sr-only">Close</span>
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Purchase Modal */}
@@ -188,6 +263,16 @@ const ProductsPage = () => {
         onConfirm={handlePurchaseConfirm}
         currentWalletBalance={user?.walletBalance || 0}
         isLoading={purchaseLoading}
+      />
+
+      {/* Gift Modal */}
+      <GiftModal
+        product={selectedProduct}
+        isOpen={isGiftModalOpen}
+        onClose={handleCloseGiftModal}
+        onConfirm={handleGiftConfirm}
+        currentWalletBalance={user?.walletBalance || 0}
+        isLoading={giftLoading}
       />
     </div>
   );

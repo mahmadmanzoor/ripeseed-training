@@ -3,9 +3,10 @@ import type { Product } from '../types/product';
 interface ProductCardProps {
   product: Product;
   onPurchase?: (product: Product) => void;
+  onGift?: (product: Product) => void;
 }
 
-const ProductCard = ({ product, onPurchase }: ProductCardProps) => {
+const ProductCard = ({ product, onPurchase, onGift }: ProductCardProps) => {
   const discountPrice = product.price - (product.price * product.discountPercentage) / 100;
 
   return (
@@ -65,14 +66,24 @@ const ProductCard = ({ product, onPurchase }: ProductCardProps) => {
             {product.category}
           </span>
           
-          {onPurchase && (
-            <button
-              onClick={() => onPurchase(product)}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 text-sm font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-            >
-              Buy Now
-            </button>
-          )}
+          <div className="flex space-x-2">
+            {onGift && (
+              <button
+                onClick={() => onGift(product)}
+                className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200 text-sm font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              >
+                🎁 Gift
+              </button>
+            )}
+            {onPurchase && (
+              <button
+                onClick={() => onPurchase(product)}
+                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 text-sm font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              >
+                Buy Now
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

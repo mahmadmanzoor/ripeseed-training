@@ -190,4 +190,115 @@ router.post('/purchase', authenticateToken, async (request: AuthenticatedRequest
   }
 });
 
+// Gift product to another user
+router.post('/gift', authenticateToken, async (request: AuthenticatedRequest, response) => {
+  try {
+    const { productId, quantity = 1, recipientEmail, message } = request.body;
+    const senderId = request.userId;
+
+    // Validate input
+    if (!productId || !quantity || quantity < 1 || !recipientEmail) {
+      response.status(400).json({ 
+        error: 'Product ID, valid quantity, and recipient email are required' 
+      });
+      return;
+    }
+
+    // Get product details from DummyJSON API
+    const productResponse = await fetch(`https://dummyjson.com/products/${productId}`);
+    if (!productResponse.ok) {
+      response.status(404).json({ error: 'Product not found' });
+      return;
+    }
+
+    const product: any = await productResponse.json();
+    
+    // Calculate total price with discount
+    const discountPrice = product.price - (product.price * (product.discountPercentage || 0)) / 100;
+    const totalAmount = discountPrice * quantity;
+
+    // Check if recipient exists
+    const recipient = await prisma.user.findUnique({
+      where: { email: recipientEmail }
+    });
+
+    if (!recipient) {
+      response.status(404).json({ error: 'Recipient user not found' });
+      return;
+    }
+
+    // Check if sender is trying to gift to themselves
+    if (senderId === recipient.id) {
+      response.status(400).json({ error: 'You cannot gift to yourself' });
+      return;
+    }
+
+    // Check if sender has sufficient wallet balance
+    const sender = await prisma.user.findUnique({
+      where: { id: senderId }
+    });
+
+    if (!sender) {
+      response.status(404).json({ error: 'Sender not found' });
+      return;
+    }
+
+    if (Number(sender.walletBalance) < totalAmount) {
+      response.status(400).json({ 
+        error: 'Insufficient wallet balance',
+        currentBalance: Number(sender.walletBalance),
+        requiredAmount: totalAmount
+      });
+      return;
+    }
+
+    // Create gift and update sender's wallet balance in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Create gift record
+      const gift = await tx.gift.create({
+        data: {
+          senderId: senderId!,
+          receiverId: recipient.id,
+          productId: productId,
+          quantity,
+          totalAmount,
+          message: message || null
+        }
+      });
+
+      // Update sender's wallet balance
+      const updatedSender = await tx.user.update({
+        where: { id: senderId! },
+        data: {
+          walletBalance: Number(sender.walletBalance) - totalAmount
+        }
+      });
+
+      return { gift, sender: updatedSender };
+    });
+
+    response.status(201).json({
+      message: 'Gift sent successfully',
+      gift: {
+        id: result.gift.id,
+        productId: result.gift.productId,
+        quantity: result.gift.quantity,
+        totalAmount: Number(result.gift.totalAmount),
+        recipientEmail: recipientEmail,
+        message: result.gift.message,
+        createdAt: result.gift.createdAt
+      },
+      sender: {
+        id: result.sender.id,
+        email: result.sender.email,
+        walletBalance: Number(result.sender.walletBalance)
+      }
+    });
+
+  } catch (error) {
+    console.error('Gift error:', error);
+    response.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

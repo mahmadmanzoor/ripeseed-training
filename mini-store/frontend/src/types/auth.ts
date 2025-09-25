@@ -83,3 +83,54 @@ export interface GiftHistoryResponse {
     received: number;
   };
 }
+
+export interface CreditTransferRequest {
+  recipientEmail: string;
+  amount: number;
+  message?: string;
+}
+
+export interface CreditTransferResponse {
+  message: string;
+  transfer: {
+    id: string;
+    amount: number;
+    recipientEmail: string;
+    message: string | null;
+    createdAt: string;
+  };
+  sender: {
+    id: string;
+    email: string;
+    walletBalance: number;
+  };
+  recipient: {
+    id: string;
+    email: string;
+    walletBalance: number;
+  };
+}
+
+export interface CreditTransferHistoryItem {
+  id: string;
+  amount: number;
+  message: string | null;
+  createdAt: string;
+  sender?: {
+    id: string;
+    email: string;
+  };
+  receiver?: {
+    id: string;
+    email: string;
+  };
+}
+
+export interface CreditTransferHistoryResponse {
+  sentTransfers: CreditTransferHistoryItem[];
+  receivedTransfers: CreditTransferHistoryItem[];
+  total: {
+    sent: number;
+    received: number;
+  };
+}

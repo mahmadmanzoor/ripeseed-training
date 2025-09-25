@@ -16,6 +16,8 @@ interface AuthContextType {
   giftProduct: (productId: number, quantity: number, recipientEmail: string, message?: string) => Promise<any>;
   fetchOrderHistory: () => Promise<any>;
   fetchGiftHistory: () => Promise<any>;
+  transferCredits: (recipientEmail: string, amount: number, message?: string) => Promise<any>;
+  fetchCreditTransferHistory: () => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -52,6 +54,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     giftProduct: auth.giftProduct,
     fetchOrderHistory: auth.fetchOrderHistory,
     fetchGiftHistory: auth.fetchGiftHistory,
+    transferCredits: async (recipientEmail: string, amount: number, message?: string) => {
+      return await auth.transferCredits({ recipientEmail, amount, message });
+    },
+    fetchCreditTransferHistory: auth.fetchCreditTransferHistory,
   };
 
   return (

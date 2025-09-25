@@ -25,6 +25,8 @@ model User {
   orders    Order[]
   sentGifts Gift[] @relation("GiftSender")
   receivedGifts Gift[] @relation("GiftReceiver")
+  sentCreditTransfers CreditTransfer[] @relation("CreditTransferSender")
+  receivedCreditTransfers CreditTransfer[] @relation("CreditTransferReceiver")
 
   @@map("users")
 }
@@ -58,4 +60,19 @@ model Gift {
   receiver User @relation("GiftReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@map("gifts")
+}
+
+model CreditTransfer {
+  id        String   @id @default(cuid())
+  senderId  String
+  receiverId String
+  amount    Decimal
+  message   String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  sender User @relation("CreditTransferSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("CreditTransferReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@map("credit_transfers")
 }

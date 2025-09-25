@@ -6,7 +6,10 @@ import type {
   RegisterRequest, 
   AuthState,
   OrderHistoryResponse,
-  GiftHistoryResponse 
+  GiftHistoryResponse,
+  CreditTransferRequest,
+  CreditTransferResponse,
+  CreditTransferHistoryResponse
 } from '../types/auth';
 
 const AUTH_TOKEN_KEY = 'authToken';
@@ -175,6 +178,34 @@ export const useAuth = () => {
     }
   };
 
+  const transferCredits = async (transferData: CreditTransferRequest): Promise<CreditTransferResponse> => {
+    try {
+      const response = await apiClient.post<CreditTransferResponse>('/auth/transfer-credits', transferData);
+
+      const { sender: updatedSender } = response.data;
+
+      // Update user data in localStorage and state
+      localStorage.setItem(USER_KEY, JSON.stringify(updatedSender));
+      setAuthState(prev => ({
+        ...prev,
+        user: updatedSender,
+      }));
+
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const fetchCreditTransferHistory = async (): Promise<CreditTransferHistoryResponse> => {
+    try {
+      const response = await apiClient.get<CreditTransferHistoryResponse>('/auth/credit-transfers');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   return {
     ...authState,
     login,
@@ -185,5 +216,7 @@ export const useAuth = () => {
     giftProduct,
     fetchOrderHistory,
     fetchGiftHistory,
+    transferCredits,
+    fetchCreditTransferHistory,
   };
 };

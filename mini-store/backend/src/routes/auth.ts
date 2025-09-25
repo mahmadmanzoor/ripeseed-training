@@ -487,4 +487,167 @@ router.get('/gifts', authenticateToken, async (request: AuthenticatedRequest, re
   }
 });
 
+// Transfer credits to another user
+router.post('/transfer-credits', authenticateToken, async (request: AuthenticatedRequest, response) => {
+  try {
+    const { recipientEmail, amount, message } = request.body;
+    const senderId = request.userId;
+
+    // Validate input
+    if (!recipientEmail || !amount || amount <= 0) {
+      response.status(400).json({ 
+        error: 'Recipient email and valid amount are required' 
+      });
+      return;
+    }
+
+    // Check if recipient exists
+    const recipient = await prisma.user.findUnique({
+      where: { email: recipientEmail }
+    });
+
+    if (!recipient) {
+      response.status(404).json({ error: 'Recipient user not found' });
+      return;
+    }
+
+    // Check if sender is trying to transfer to themselves
+    if (senderId === recipient.id) {
+      response.status(400).json({ error: 'You cannot transfer credits to yourself' });
+      return;
+    }
+
+    // Check if sender has sufficient wallet balance
+    const sender = await prisma.user.findUnique({
+      where: { id: senderId }
+    });
+
+    if (!sender) {
+      response.status(404).json({ error: 'Sender not found' });
+      return;
+    }
+
+    if (Number(sender.walletBalance) < amount) {
+      response.status(400).json({ 
+        error: 'Insufficient wallet balance',
+        currentBalance: Number(sender.walletBalance),
+        requiredAmount: amount
+      });
+      return;
+    }
+
+    // Create credit transfer and update wallet balances in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Create credit transfer record
+      const creditTransfer = await tx.creditTransfer.create({
+        data: {
+          senderId: senderId!,
+          receiverId: recipient.id,
+          amount: amount,
+          message: message || null
+        }
+      });
+
+      // Update sender's wallet balance (deduct amount)
+      const updatedSender = await tx.user.update({
+        where: { id: senderId! },
+        data: {
+          walletBalance: Number(sender.walletBalance) - amount
+        }
+      });
+
+      // Update recipient's wallet balance (add amount)
+      const updatedRecipient = await tx.user.update({
+        where: { id: recipient.id },
+        data: {
+          walletBalance: Number(recipient.walletBalance) + amount
+        }
+      });
+
+      return { creditTransfer, sender: updatedSender, recipient: updatedRecipient };
+    });
+
+    response.status(201).json({
+      message: 'Credit transfer successful',
+      transfer: {
+        id: result.creditTransfer.id,
+        amount: Number(result.creditTransfer.amount),
+        recipientEmail: recipientEmail,
+        message: result.creditTransfer.message,
+        createdAt: result.creditTransfer.createdAt
+      },
+      sender: {
+        id: result.sender.id,
+        email: result.sender.email,
+        walletBalance: Number(result.sender.walletBalance)
+      },
+      recipient: {
+        id: result.recipient.id,
+        email: result.recipient.email,
+        walletBalance: Number(result.recipient.walletBalance)
+      }
+    });
+
+  } catch (error) {
+    console.error('Credit transfer error:', error);
+    response.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get user's credit transfer history
+router.get('/credit-transfers', authenticateToken, async (request: AuthenticatedRequest, response) => {
+  try {
+    const userId = request.userId;
+
+    // Get sent credit transfers
+    const sentTransfers = await prisma.creditTransfer.findMany({
+      where: { senderId: userId! },
+      include: {
+        receiver: {
+          select: {
+            id: true,
+            email: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 25
+    });
+
+    // Get received credit transfers
+    const receivedTransfers = await prisma.creditTransfer.findMany({
+      where: { receiverId: userId! },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            email: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 25
+    });
+
+    response.status(200).json({
+      sentTransfers: sentTransfers.map((transfer: any) => ({
+        ...transfer,
+        amount: Number(transfer.amount)
+      })),
+      receivedTransfers: receivedTransfers.map((transfer: any) => ({
+        ...transfer,
+        amount: Number(transfer.amount)
+      })),
+      total: {
+        sent: sentTransfers.length,
+        received: receivedTransfers.length
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching credit transfer history:', error);
+    response.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

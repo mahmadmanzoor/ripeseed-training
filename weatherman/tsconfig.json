@@ -1,34 +1,23 @@
 {
   "compilerOptions": {
-    // File Layout
-    "rootDir": "./weatherman/src",
+    "rootDir": "./src",
     "outDir": "./dist",
-
-    // Environment Settings
     "module": "nodenext",
     "target": "ES2022",
     "lib": ["es2022"],
     "moduleResolution": "nodenext",
     "types": ["node"],
-
-    // Outputs
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
-
-    // Type Safety
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
-
-    // ESM + Modern Syntax
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "moduleDetection": "force",
-
-    // Performance
     "skipLibCheck": true
   },
-  "include": ["weatherman/src/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

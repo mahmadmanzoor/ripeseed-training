@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
 import CreditTransferModal from '../components/CreditTransferModal';
+import Navbar from '../components/Navbar';
 
 const HomePage = () => {
   const { user, isAuthenticated, logout, transferCredits } = useAuthContext();
@@ -51,6 +52,7 @@ const HomePage = () => {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50">
+        <Navbar />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -89,38 +91,8 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">🏪 Mini Store</h1>
-              <p className="text-gray-600">Welcome back, {user?.email}!</p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <a
-                href="/products"
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-              >
-                Browse Products
-              </a>
-              <div className="bg-green-100 px-4 py-2 rounded-lg">
-                <span className="text-sm text-green-800">💰 Wallet Balance</span>
-                <p className="text-lg font-semibold text-green-900">
-                  ${Number(user?.walletBalance || 0).toFixed(2)}
-                </p>
-              </div>
-              <button
-                onClick={logout}
-                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      <Navbar />
+      
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

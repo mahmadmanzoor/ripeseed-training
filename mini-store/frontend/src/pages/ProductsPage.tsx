@@ -5,6 +5,7 @@ import ProductGrid from '../components/ProductGrid';
 import SearchAndFilter from '../components/SearchAndFilter';
 import PurchaseModal from '../components/PurchaseModal';
 import GiftModal from '../components/GiftModal';
+import Navbar from '../components/Navbar';
 import type { Product, ProductFilters } from '../types/product';
 
 const ProductsPage = () => {
@@ -113,13 +114,15 @@ const ProductsPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      {/* Header */}
+      <Navbar />
+      
+      {/* Page Header */}
       <div className="bg-white shadow-lg border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                🛍️ Mini Store
+                🛍️ Products
               </h1>
               <p className="text-gray-600 mt-2 text-lg">
                 {loading ? 'Loading amazing products...' : `${total} products found`}

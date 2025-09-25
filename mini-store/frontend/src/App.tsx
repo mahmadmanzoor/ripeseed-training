@@ -7,6 +7,7 @@ import RegisterPage from './pages/RegisterPage';
 import ProductsPage from './pages/ProductsPage';
 import OrderHistoryPage from './pages/OrderHistoryPage';
 import GiftHistoryPage from './pages/GiftHistoryPage';
+import CreditTransferHistoryPage from './pages/CreditTransferHistoryPage';
 
 // Protected Route Component (for future use)
 // const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -54,6 +55,7 @@ function App() {
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/orders" element={<OrderHistoryPage />} />
             <Route path="/gifts" element={<GiftHistoryPage />} />
+            <Route path="/credit-transfers" element={<CreditTransferHistoryPage />} />
             <Route 
               path="/login" 
               element={

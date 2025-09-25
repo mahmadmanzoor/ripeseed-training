@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
+import Navbar from '../components/Navbar';
 import type { OrderHistoryItem } from '../types/auth';
 
 const OrderHistoryPage = () => {
@@ -75,7 +76,9 @@ const OrderHistoryPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      <Navbar />
+      
+      {/* Page Header */}
       <div className="bg-white shadow-lg border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between">
@@ -86,11 +89,6 @@ const OrderHistoryPage = () => {
               <p className="text-gray-600 mt-2 text-lg">
                 {total === 0 ? 'No orders yet' : `${total} order${total === 1 ? '' : 's'} found`}
               </p>
-            </div>
-            <div className="bg-green-50 px-4 py-2 rounded-lg border border-green-200">
-              <div className="text-sm text-green-600 font-medium">
-                👤 {user?.email}
-              </div>
             </div>
           </div>
         </div>

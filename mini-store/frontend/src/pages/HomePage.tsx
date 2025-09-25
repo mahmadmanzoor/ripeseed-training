@@ -103,9 +103,12 @@ const HomePage = () => {
             <p className="text-gray-600 mb-4">
               Track your past purchases and orders
             </p>
-            <button className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors">
+            <a
+              href="/orders"
+              className="block w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors text-center"
+            >
               View Orders
-            </button>
+            </a>
           </div>
 
           {/* Gifts Card */}
@@ -116,9 +119,12 @@ const HomePage = () => {
             <p className="text-gray-600 mb-4">
               Manage your sent and received gifts
             </p>
-            <button className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition-colors">
+            <a
+              href="/gifts"
+              className="block w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition-colors text-center"
+            >
               View Gifts
-            </button>
+            </a>
           </div>
         </div>
       </div>

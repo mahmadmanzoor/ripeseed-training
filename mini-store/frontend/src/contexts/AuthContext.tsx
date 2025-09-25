@@ -14,6 +14,8 @@ interface AuthContextType {
   updateUserWalletBalance: (newBalance: number) => void;
   purchaseProduct: (productId: number, quantity: number) => Promise<any>;
   giftProduct: (productId: number, quantity: number, recipientEmail: string, message?: string) => Promise<any>;
+  fetchOrderHistory: () => Promise<any>;
+  fetchGiftHistory: () => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,6 +50,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     updateUserWalletBalance: auth.updateUserWalletBalance,
     purchaseProduct: auth.purchaseProduct,
     giftProduct: auth.giftProduct,
+    fetchOrderHistory: auth.fetchOrderHistory,
+    fetchGiftHistory: auth.fetchGiftHistory,
   };
 
   return (

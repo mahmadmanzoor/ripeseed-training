@@ -301,4 +301,190 @@ router.post('/gift', authenticateToken, async (request: AuthenticatedRequest, re
   }
 });
 
+// Get user's order history
+router.get('/orders', authenticateToken, async (request: AuthenticatedRequest, response) => {
+  try {
+    const userId = request.userId;
+
+    const orders = await prisma.order.findMany({
+      where: { userId: userId! },
+      orderBy: { createdAt: 'desc' },
+      take: 50 // Limit to 50 most recent orders
+    });
+
+    // Fetch product details for each order
+    const ordersWithProductDetails = await Promise.all(
+      orders.map(async (order) => {
+        try {
+          const productResponse = await fetch(`https://dummyjson.com/products/${order.productId}`);
+          if (!productResponse.ok) {
+            return {
+              ...order,
+              product: null,
+              totalAmount: Number(order.totalAmount)
+            };
+          }
+          
+          const product: any = await productResponse.json();
+          return {
+            ...order,
+            product: {
+              id: product.id,
+              title: product.title,
+              thumbnail: product.thumbnail,
+              brand: product.brand,
+              category: product.category,
+              price: product.price,
+              discountPercentage: product.discountPercentage || 0
+            },
+            totalAmount: Number(order.totalAmount)
+          };
+        } catch (error) {
+          console.error(`Error fetching product ${order.productId}:`, error);
+          return {
+            ...order,
+            product: null,
+            totalAmount: Number(order.totalAmount)
+          };
+        }
+      })
+    );
+
+    response.status(200).json({
+      orders: ordersWithProductDetails,
+      total: orders.length
+    });
+
+  } catch (error) {
+    console.error('Error fetching order history:', error);
+    response.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get user's gift history (sent and received)
+router.get('/gifts', authenticateToken, async (request: AuthenticatedRequest, response) => {
+  try {
+    const userId = request.userId;
+
+    // Get sent gifts
+    const sentGifts = await prisma.gift.findMany({
+      where: { senderId: userId! },
+      include: {
+        receiver: {
+          select: {
+            id: true,
+            email: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 25
+    });
+
+    // Get received gifts
+    const receivedGifts = await prisma.gift.findMany({
+      where: { receiverId: userId! },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            email: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 25
+    });
+
+    // Fetch product details for sent gifts
+    const sentGiftsWithProductDetails = await Promise.all(
+      sentGifts.map(async (gift) => {
+        try {
+          const productResponse = await fetch(`https://dummyjson.com/products/${gift.productId}`);
+          if (!productResponse.ok) {
+            return {
+              ...gift,
+              product: null,
+              totalAmount: Number(gift.totalAmount)
+            };
+          }
+          
+          const product: any = await productResponse.json();
+          return {
+            ...gift,
+            product: {
+              id: product.id,
+              title: product.title,
+              thumbnail: product.thumbnail,
+              brand: product.brand,
+              category: product.category,
+              price: product.price,
+              discountPercentage: product.discountPercentage || 0
+            },
+            totalAmount: Number(gift.totalAmount)
+          };
+        } catch (error) {
+          console.error(`Error fetching product ${gift.productId}:`, error);
+          return {
+            ...gift,
+            product: null,
+            totalAmount: Number(gift.totalAmount)
+          };
+        }
+      })
+    );
+
+    // Fetch product details for received gifts
+    const receivedGiftsWithProductDetails = await Promise.all(
+      receivedGifts.map(async (gift) => {
+        try {
+          const productResponse = await fetch(`https://dummyjson.com/products/${gift.productId}`);
+          if (!productResponse.ok) {
+            return {
+              ...gift,
+              product: null,
+              totalAmount: Number(gift.totalAmount)
+            };
+          }
+          
+          const product: any = await productResponse.json();
+          return {
+            ...gift,
+            product: {
+              id: product.id,
+              title: product.title,
+              thumbnail: product.thumbnail,
+              brand: product.brand,
+              category: product.category,
+              price: product.price,
+              discountPercentage: product.discountPercentage || 0
+            },
+            totalAmount: Number(gift.totalAmount)
+          };
+        } catch (error) {
+          console.error(`Error fetching product ${gift.productId}:`, error);
+          return {
+            ...gift,
+            product: null,
+            totalAmount: Number(gift.totalAmount)
+          };
+        }
+      })
+    );
+
+    response.status(200).json({
+      sentGifts: sentGiftsWithProductDetails,
+      receivedGifts: receivedGiftsWithProductDetails,
+      total: {
+        sent: sentGifts.length,
+        received: receivedGifts.length
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching gift history:', error);
+    response.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

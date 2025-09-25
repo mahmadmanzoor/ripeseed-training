@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '../lib/api';
-import type { AuthResponse, LoginRequest, RegisterRequest, AuthState } from '../types/auth';
+import type { 
+  AuthResponse, 
+  LoginRequest, 
+  RegisterRequest, 
+  AuthState,
+  OrderHistoryResponse,
+  GiftHistoryResponse 
+} from '../types/auth';
 
 const AUTH_TOKEN_KEY = 'authToken';
 const USER_KEY = 'user';
@@ -150,6 +157,24 @@ export const useAuth = () => {
     }
   };
 
+  const fetchOrderHistory = async (): Promise<OrderHistoryResponse> => {
+    try {
+      const response = await apiClient.get<OrderHistoryResponse>('/auth/orders');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const fetchGiftHistory = async (): Promise<GiftHistoryResponse> => {
+    try {
+      const response = await apiClient.get<GiftHistoryResponse>('/auth/gifts');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   return {
     ...authState,
     login,
@@ -158,5 +183,7 @@ export const useAuth = () => {
     updateUserWalletBalance,
     purchaseProduct,
     giftProduct,
+    fetchOrderHistory,
+    fetchGiftHistory,
   };
 };

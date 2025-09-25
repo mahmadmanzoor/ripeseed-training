@@ -1,169 +1,117 @@
 import chalk from "chalk";
+import type { weatherModel } from "../models/weatherModel.js";
 
-import { CHART_CONSTANTS, DISPLAY_CONSTANTS, ERROR_MESSAGES } from "../constants/weatherConstants.js";
-import type { WeatherRecord } from "../models/weatherRecord.js";
-
-export function generateChartReport(weatherRecords: WeatherRecord[], year: number, month: number): void {
-  const chartContext = createChartContext(weatherRecords, year, month);
-  renderChart(chartContext, (weatherRecord, temperatureRange, formattedDay) => 
-    displayTemperatureBars(weatherRecord, temperatureRange, formattedDay)
-  );
-}
-
-function displayChartHeader(year: number, month: number): void {
+export function generateChartReport(data: weatherModel[], year: number, month: number): void {
   const monthName = new Date(year, month - 1, 1).toLocaleDateString("en-US", { month: "long" });
   console.log(`\n${monthName} ${year}`);
-}
 
-function createWeatherDataMap(weatherRecords: WeatherRecord[]): Map<number, WeatherRecord> {
-  const dataMap = new Map<number, WeatherRecord>();
-  for (const weatherRecord of weatherRecords) {
-    dataMap.set(weatherRecord.date.getDate(), weatherRecord);
-  }
-  return dataMap;
-}
-
-function calculateTemperatureRange(weatherRecords: WeatherRecord[]): { minimum: number; maximum: number } {
-  let minimumTemperature = Infinity;
-  let maximumTemperature = -Infinity;
+  // Get the correct number of days for this month/year
+  const daysInMonth = new Date(year, month, 0).getDate();
   
-  for (const weatherRecord of weatherRecords) {
-    if (weatherRecord.maximumTemperatureCelsius != null) {
-      maximumTemperature = Math.max(maximumTemperature, weatherRecord.maximumTemperatureCelsius);
-    }
-    if (weatherRecord.minimumTemperatureCelsius != null) {
-      minimumTemperature = Math.min(minimumTemperature, weatherRecord.minimumTemperatureCelsius);
-    }
+  // Create a map of existing data for quick lookup
+  const dataMap = new Map<number, weatherModel>();
+  for (const record of data) {
+    dataMap.set(record.date.getDate(), record);
+  }
+
+  // Find min and max temperatures for scaling
+  let minTemp = Infinity;
+  let maxTemp = -Infinity;
+  
+  for (const record of data) {
+    if (record.maxTempC !== undefined) maxTemp = Math.max(maxTemp, record.maxTempC);
+    if (record.minTempC !== undefined) minTemp = Math.min(minTemp, record.minTempC);
   }
 
   // Handle edge case where all temperatures are the same
-  if (minimumTemperature === maximumTemperature) {
-    minimumTemperature = maximumTemperature - CHART_CONSTANTS.DEFAULT_TEMPERATURE_OFFSET;
+  if (minTemp === maxTemp) {
+    minTemp = maxTemp - 1;
   }
-  
-  return { minimum: minimumTemperature, maximum: maximumTemperature };
-}
 
-function formatDayNumber(day: number): string {
-  return day.toString().padStart(2, "0");
-}
-
-function hasTemperatureData(weatherRecord: WeatherRecord): boolean {
-  return weatherRecord.maximumTemperatureCelsius != null || 
-         weatherRecord.minimumTemperatureCelsius != null;
-}
-
-function displayNoDataMessage(formattedDay: string): void {
-  console.log(`${formattedDay} ${ERROR_MESSAGES.NO_DATA_AVAILABLE}`);
-}
-
-function displayTemperatureBars(
-  weatherRecord: WeatherRecord, 
-  temperatureRange: { minimum: number; maximum: number }, 
-  formattedDay: string
-): void {
-  if (weatherRecord.maximumTemperatureCelsius != null) {
-    displayMaximumTemperatureBar(weatherRecord.maximumTemperatureCelsius, temperatureRange, formattedDay);
-  }
-  
-  if (weatherRecord.minimumTemperatureCelsius != null) {
-    displayMinimumTemperatureBar(weatherRecord.minimumTemperatureCelsius, temperatureRange, formattedDay);
-  }
-}
-
-function displayMaximumTemperatureBar(
-  maximumTemperature: number, 
-  temperatureRange: { minimum: number; maximum: number }, 
-  formattedDay: string
-): void {
-  const barLength = calculateBarLength(maximumTemperature, temperatureRange);
-  const temperatureBar = "+".repeat(barLength);
-  console.log(`${formattedDay} ${chalk.red(temperatureBar)} ${maximumTemperature}${DISPLAY_CONSTANTS.CELSIUS_SUFFIX}`);
-}
-
-function displayMinimumTemperatureBar(
-  minimumTemperature: number, 
-  temperatureRange: { minimum: number; maximum: number }, 
-  formattedDay: string
-): void {
-  const barLength = calculateBarLength(minimumTemperature, temperatureRange);
-  const temperatureBar = "+".repeat(barLength);
-  console.log(`${formattedDay} ${chalk.blue(temperatureBar)} ${minimumTemperature}${DISPLAY_CONSTANTS.CELSIUS_SUFFIX}`);
-}
-
-function calculateBarLength(
-  temperature: number, 
-  temperatureRange: { minimum: number; maximum: number }
-): number {
-  const normalizedTemperature = (temperature - temperatureRange.minimum) / (temperatureRange.maximum - temperatureRange.minimum);
-  return Math.max(
-    CHART_CONSTANTS.MINIMUM_BAR_LENGTH, 
-    Math.round(normalizedTemperature * CHART_CONSTANTS.BAR_LENGTH)
-  );
-}
-
-export function generateCombinedChartReport(weatherRecords: WeatherRecord[], year: number, month: number): void {
-  const chartContext = createChartContext(weatherRecords, year, month);
-  renderChart(chartContext, (weatherRecord, temperatureRange, formattedDay) => 
-    displayCombinedTemperatureBars(weatherRecord, temperatureRange, formattedDay)
-  );
-}
-
-interface ChartContext {
-  daysInMonth: number;
-  weatherDataMap: Map<number, WeatherRecord>;
-  temperatureRange: { minimum: number; maximum: number };
-}
-
-function createChartContext(weatherRecords: WeatherRecord[], year: number, month: number): ChartContext {
-  displayChartHeader(year, month);
-  
-  return {
-    daysInMonth: new Date(year, month, 0).getDate(),
-    weatherDataMap: createWeatherDataMap(weatherRecords),
-    temperatureRange: calculateTemperatureRange(weatherRecords)
-  };
-}
-
-function renderChart(
-  chartContext: ChartContext, 
-  renderFunction: (weatherRecord: WeatherRecord, temperatureRange: { minimum: number; maximum: number }, formattedDay: string) => void
-): void {
-  for (let day = 1; day <= chartContext.daysInMonth; day++) {
-    const formattedDay = formatDayNumber(day);
-    const weatherRecord = chartContext.weatherDataMap.get(day);
+  // Generate bars for each day of the month
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayStr = day.toString().padStart(2, "0");
+    const record = dataMap.get(day);
     
-    if (!weatherRecord || !hasTemperatureData(weatherRecord)) {
-      displayNoDataMessage(formattedDay);
+    if (!record) {
+      // No data file exists for this day
+      console.log(`${dayStr} No data available`);
       continue;
     }
     
-    renderFunction(weatherRecord, chartContext.temperatureRange, formattedDay);
+    // Check if we have any temperature data for this day
+    const hasMaxTemp = record.maxTempC !== undefined;
+    const hasMinTemp = record.minTempC !== undefined;
+    
+    if (!hasMaxTemp && !hasMinTemp) {
+      // Data file exists but no temperature data
+      console.log(`${dayStr} No data available`);
+      continue;
+    }
+    
+    // Generate max temperature bar (red)
+    if (hasMaxTemp) {
+      const maxBarLength = Math.max(1, Math.round((record.maxTempC! - minTemp) / (maxTemp - minTemp) * 30));
+      const maxBar = "+".repeat(maxBarLength);
+      console.log(`${dayStr} ${chalk.red(maxBar)} ${record.maxTempC}C`);
+    }
+    
+    // Generate min temperature bar (blue)
+    if (hasMinTemp) {
+      const minBarLength = Math.max(1, Math.round((record.minTempC! - minTemp) / (maxTemp - minTemp) * 30));
+      const minBar = "+".repeat(minBarLength);
+      console.log(`${dayStr} ${chalk.blue(minBar)} ${record.minTempC}C`);
+    }
   }
 }
 
-function hasCompleteTemperatureData(weatherRecord: WeatherRecord): boolean {
-  return weatherRecord.minimumTemperatureCelsius != null && 
-         weatherRecord.maximumTemperatureCelsius != null;
-}
+export function generateCombinedChartReport(data: weatherModel[], year: number, month: number): void {
+  const monthName = new Date(year, month - 1, 1).toLocaleDateString("en-US", { month: "long" });
+  console.log(`\n${monthName} ${year}`);
 
-function displayCombinedTemperatureBars(
-  weatherRecord: WeatherRecord, 
-  temperatureRange: { minimum: number; maximum: number }, 
-  formattedDay: string
-): void {
-  // Validate that both temperature values are available before proceeding
-  if (weatherRecord.minimumTemperatureCelsius == null || weatherRecord.maximumTemperatureCelsius == null) {
-    displayNoDataMessage(formattedDay);
-    return;
+  // Get the correct number of days for this month/year
+  const daysInMonth = new Date(year, month, 0).getDate();
+  
+  // Create a map of existing data for quick lookup
+  const dataMap = new Map<number, weatherModel>();
+  for (const record of data) {
+    dataMap.set(record.date.getDate(), record);
   }
+
+  // Find min and max temperatures for scaling
+  let minTemp = Infinity;
+  let maxTemp = -Infinity;
   
-  const minimumBarLength = calculateBarLength(weatherRecord.minimumTemperatureCelsius, temperatureRange);
-  const maximumBarLength = calculateBarLength(weatherRecord.maximumTemperatureCelsius, temperatureRange);
-  
-  const minimumBar = "+".repeat(minimumBarLength);
-  const maximumBar = "+".repeat(maximumBarLength);
-  const combinedBar = `${chalk.blue(minimumBar)} - ${chalk.red(maximumBar)}`;
-  
-  console.log(`${formattedDay} ${combinedBar} ${weatherRecord.minimumTemperatureCelsius}${DISPLAY_CONSTANTS.CELSIUS_SUFFIX} - ${weatherRecord.maximumTemperatureCelsius}${DISPLAY_CONSTANTS.CELSIUS_SUFFIX}`);
+  for (const record of data) {
+    if (record.maxTempC !== undefined) maxTemp = Math.max(maxTemp, record.maxTempC);
+    if (record.minTempC !== undefined) minTemp = Math.min(minTemp, record.minTempC);
+  }
+
+  // Handle edge case where all temperatures are the same
+  if (minTemp === maxTemp) {
+    minTemp = maxTemp - 1;
+  }
+
+  // Generate combined bars for each day of the month
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayStr = day.toString().padStart(2, "0");
+    const record = dataMap.get(day);
+    
+    if (!record || record.minTempC === undefined || record.maxTempC === undefined) {
+      // No data available for this day
+      console.log(`${dayStr} No data available`);
+      continue;
+    }
+    
+    // Calculate bar lengths
+    const minBarLength = Math.max(1, Math.round((record.minTempC - minTemp) / (maxTemp - minTemp) * 30));
+    const maxBarLength = Math.max(1, Math.round((record.maxTempC - minTemp) / (maxTemp - minTemp) * 30));
+    
+    // Create combined bar: blue for min, red for max
+    const minBar = "+".repeat(minBarLength);
+    const maxBar = "+".repeat(maxBarLength);
+    const combinedBar = `${chalk.blue(minBar)} - ${chalk.red(maxBar)}`;
+    
+    console.log(`${dayStr} ${combinedBar} ${record.minTempC}C - ${record.maxTempC}C`);
+  }
 }

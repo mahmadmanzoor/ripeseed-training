@@ -83,27 +83,49 @@ function hasValidData(record: WeatherRecord): boolean {
  */
 function parseDateSafely(dateString: string): Date {
   try {
-    // Strategy 1: Try parsing the date string as-is first
+    // Strategy 1: Handle ISO date-only strings (YYYY-MM-DD) with local parsing
+    // This prevents day/month drift caused by UTC interpretation
+    const trimmedDate = dateString.trim();
+    
+    // Strip timezone abbreviations (e.g., "PDT", "BST") from the input string
+    const dateWithoutTimezone = trimmedDate.replace(/\s+[A-Z]{2,4}$/, '');
+    
+    // Check if it's an ISO date-only string (YYYY-MM-DD)
+    const isoDateOnlyMatch = dateWithoutTimezone.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (isoDateOnlyMatch && isoDateOnlyMatch[1] && isoDateOnlyMatch[2] && isoDateOnlyMatch[3]) {
+      const yearStr = isoDateOnlyMatch[1];
+      const monthStr = isoDateOnlyMatch[2];
+      const dayStr = isoDateOnlyMatch[3];
+      const year = parseInt(yearStr, 10);
+      const month = parseInt(monthStr, 10) - 1; // Convert to 0-based month index
+      const day = parseInt(dayStr, 10);
+      
+      // Create Date using local components to avoid timezone issues
+      const localDate = new Date(year, month, day);
+      if (!isNaN(localDate.getTime())) {
+        return localDate;
+      }
+    }
+
+    // Strategy 2: Try parsing the date string as-is first
     // This handles most standard date formats
-    const parsedDate = new Date(dateString);
+    const parsedDate = new Date(dateWithoutTimezone);
     if (!isNaN(parsedDate.getTime())) {
       return parsedDate;
     }
 
-    // Strategy 2: Handle different timezone formats
-    const trimmedDate = dateString.trim();
-
+    // Strategy 3: Handle different timezone formats
     // Check if the date string contains any known timezone indicators
     const hasTimezone = DATE_PARSING.SUPPORTED_TIMEZONES.some(timezone =>
-      trimmedDate.includes(timezone)
+      dateWithoutTimezone.includes(timezone)
     );
 
     if (hasTimezone) {
       // If it has a recognized timezone, parse it directly
-      return new Date(trimmedDate);
+      return new Date(dateWithoutTimezone);
     } else {
-      // Strategy 3: If no timezone detected, treat as UTC to avoid timezone issues
-      const utcDateString = trimmedDate.endsWith('Z') ? trimmedDate : trimmedDate + 'Z';
+      // Strategy 4: If no timezone detected, treat as UTC to avoid timezone issues
+      const utcDateString = dateWithoutTimezone.endsWith('Z') ? dateWithoutTimezone : dateWithoutTimezone + 'Z';
       const utcDate = new Date(utcDateString);
 
       if (!isNaN(utcDate.getTime())) {
@@ -111,8 +133,8 @@ function parseDateSafely(dateString: string): Date {
       }
     }
 
-    // Strategy 4: Final fallback - try parsing as local time
-    return new Date(trimmedDate);
+    // Strategy 5: Final fallback - try parsing as local time
+    return new Date(dateWithoutTimezone);
   } catch (error) {
     // Return an invalid Date so the downstream filter can drop the row
     // This approach allows the parsing to continue with other records

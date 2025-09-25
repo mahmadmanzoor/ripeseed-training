@@ -92,6 +92,33 @@ function calculateTemperatureRange(weatherRecords: WeatherRecord[]): { minimum: 
     }
   }
 
+  // Handle edge cases where only one series exists or no data is available
+  // This prevents NaN values in normalization and .repeat() calls
+  
+  // If minimum is still Infinity (no minimum temperatures found)
+  if (minimumTemperature === Infinity) {
+    if (maximumTemperature === -Infinity) {
+      // No temperature data at all - use default range
+      minimumTemperature = 0;
+      maximumTemperature = CHART_CONSTANTS.DEFAULT_TEMPERATURE_OFFSET;
+    } else {
+      // Only maximum temperatures found - set minimum relative to maximum
+      minimumTemperature = maximumTemperature - CHART_CONSTANTS.DEFAULT_TEMPERATURE_OFFSET;
+    }
+  }
+  
+  // If maximum is still -Infinity (no maximum temperatures found)
+  if (maximumTemperature === -Infinity) {
+    if (minimumTemperature === Infinity) {
+      // No temperature data at all - use default range
+      minimumTemperature = 0;
+      maximumTemperature = CHART_CONSTANTS.DEFAULT_TEMPERATURE_OFFSET;
+    } else {
+      // Only minimum temperatures found - set maximum relative to minimum
+      maximumTemperature = minimumTemperature + CHART_CONSTANTS.DEFAULT_TEMPERATURE_OFFSET;
+    }
+  }
+
   // Handle edge case where all temperatures are the same
   // This prevents division by zero in bar length calculations
   if (minimumTemperature === maximumTemperature) {

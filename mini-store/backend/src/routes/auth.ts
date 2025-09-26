@@ -17,6 +17,19 @@ router.post('/register', async (request, response) => {
       return;
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      response.status(400).json({ error: 'Invalid email format' });
+      return;
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      response.status(400).json({ error: 'Password must be at least 6 characters long' });
+      return;
+    }
+
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email }

@@ -27,6 +27,17 @@ router.post('/create-checkout-session', async (request: AuthenticatedRequest, re
       return response.status(400).json({ error: 'Invalid amount' });
     }
 
+    // Verify user exists in database
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true }
+    });
+
+    if (!user) {
+      console.log('User not found in database:', userId);
+      return response.status(401).json({ error: 'User not found' });
+    }
+
     // Convert amount to cents (Stripe expects amounts in cents)
     const amountInCents = Math.round(amount * 100);
     console.log('Amount in cents:', amountInCents);

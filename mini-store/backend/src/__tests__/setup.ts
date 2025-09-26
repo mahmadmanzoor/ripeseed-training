@@ -7,7 +7,6 @@ delete (globalThis as any).__prisma;
 
 // Create a test-specific Prisma client that ALWAYS uses the test database
 import { PrismaClient } from '@prisma/client';
-
 const prisma = new PrismaClient({
   datasources: {
     db: {
@@ -35,7 +34,6 @@ async function cleanDatabase() {
     console.log('Database cleanup error (ignored):', error);
   }
 }
-
 // Global test setup
 beforeAll(async () => {
   // Connect to test database

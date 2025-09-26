@@ -25,7 +25,6 @@ describe('Payment Routes', () => {
     if (registerResponse.status !== 201) {
       throw new Error(`User registration failed: ${JSON.stringify(registerResponse.body)}`);
     }
-
     authToken = registerResponse.body.token;
     userId = registerResponse.body.user.id;
   });

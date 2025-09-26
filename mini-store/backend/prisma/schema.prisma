@@ -28,6 +28,7 @@ model User {
   receivedGifts Gift[] @relation("GiftReceiver")
   sentCreditTransfers CreditTransfer[] @relation("CreditTransferSender")
   receivedCreditTransfers CreditTransfer[] @relation("CreditTransferReceiver")
+  payments  Payment[]
 
   @@map("users")
 }
@@ -76,4 +77,19 @@ model CreditTransfer {
   receiver User @relation("CreditTransferReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@map("credit_transfers")
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  userId        String
+  stripePaymentIntentId String @unique
+  amount        Decimal
+  status        String   // pending, succeeded, failed, canceled
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
 }

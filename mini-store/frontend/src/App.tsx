@@ -9,6 +9,8 @@ import OrderHistoryPage from './pages/OrderHistoryPage';
 import GiftHistoryPage from './pages/GiftHistoryPage';
 import CreditTransferHistoryPage from './pages/CreditTransferHistoryPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import PaymentCancelPage from './pages/PaymentCancelPage';
 
 // Protected Route Component (for future use)
 // const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -107,6 +109,8 @@ function App() {
                 </AdminRoute>
               } 
             />
+            <Route path="/payment/success" element={<PaymentSuccessPage />} />
+            <Route path="/payment/cancel" element={<PaymentCancelPage />} />
           </Routes>
         </Router>
       </AuthProvider>

@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../contexts/AuthContext';
 import CreditTransferModal from '../components/CreditTransferModal';
+import PaymentModal from '../components/PaymentModal';
 import Navbar from '../components/Navbar';
 
 const HomePage = () => {
   const { user, isAuthenticated, logout, transferCredits } = useAuthContext();
   const navigate = useNavigate();
   const [isCreditTransferModalOpen, setIsCreditTransferModalOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [transferLoading, setTransferLoading] = useState(false);
   const [transferMessage, setTransferMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -25,6 +27,16 @@ const HomePage = () => {
     }
     
     setIsCreditTransferModalOpen(true);
+    setTransferMessage(null);
+  };
+
+  const handleAddCredits = () => {
+    if (!user) {
+      setTransferMessage({ type: 'error', text: 'Please login to add credits' });
+      return;
+    }
+    
+    setIsPaymentModalOpen(true);
     setTransferMessage(null);
   };
 
@@ -55,6 +67,22 @@ const HomePage = () => {
 
   const handleCloseCreditTransferModal = () => {
     setIsCreditTransferModalOpen(false);
+    setTransferMessage(null);
+  };
+
+  const handlePaymentSuccess = (amount: number) => {
+    setTransferMessage({ 
+      type: 'success', 
+      text: `💳 Successfully added $${amount.toFixed(2)} to your wallet!` 
+    });
+    setIsPaymentModalOpen(false);
+    
+    // Clear success message after 5 seconds
+    setTimeout(() => setTransferMessage(null), 5000);
+  };
+
+  const handleClosePaymentModal = () => {
+    setIsPaymentModalOpen(false);
     setTransferMessage(null);
   };
 
@@ -104,7 +132,7 @@ const HomePage = () => {
       
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           {/* Products Card */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">
@@ -168,6 +196,22 @@ const HomePage = () => {
               Transfer Credits
             </button>
           </div>
+
+          {/* Add Credits Card */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              💳 Add Credits
+            </h2>
+            <p className="text-gray-600 mb-4">
+              Top up your wallet with real money
+            </p>
+            <button
+              onClick={handleAddCredits}
+              className="block w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition-colors"
+            >
+              Add Credits
+            </button>
+          </div>
         </div>
 
         {/* Credit Transfer Success/Error Message */}
@@ -204,6 +248,13 @@ const HomePage = () => {
           onConfirm={handleCreditTransferConfirm}
           currentWalletBalance={user?.walletBalance || 0}
           isLoading={transferLoading}
+        />
+
+        {/* Payment Modal */}
+        <PaymentModal
+          isOpen={isPaymentModalOpen}
+          onClose={handleClosePaymentModal}
+          onSuccess={handlePaymentSuccess}
         />
       </div>
     </div>

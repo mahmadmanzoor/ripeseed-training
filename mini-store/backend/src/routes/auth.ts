@@ -654,4 +654,35 @@ router.get('/credit-transfers', authenticateToken, async (request: Authenticated
   }
 });
 
+// Get current user info
+router.get('/me', authenticateToken, async (request: AuthenticatedRequest, response) => {
+  try {
+    const userId = request.userId;
+
+    if (!userId) {
+      return response.status(401).json({ error: 'User not authenticated' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        walletBalance: true,
+        isAdmin: true,
+        createdAt: true,
+      },
+    });
+
+    if (!user) {
+      return response.status(404).json({ error: 'User not found' });
+    }
+
+    response.json({ user });
+  } catch (error: unknown) {
+    console.error('Error fetching user info:', error);
+    response.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

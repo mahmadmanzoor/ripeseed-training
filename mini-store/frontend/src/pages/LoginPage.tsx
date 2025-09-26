@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuthContext } from '../contexts/AuthContext';
 import { loginSchema } from '../lib/validation';
@@ -10,6 +11,7 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { login } = useAuthContext();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -24,8 +26,14 @@ const LoginPage = () => {
     setError(null);
 
     try {
-      await login(data.email, data.password);
-      // Redirect will be handled by the auth context
+      const response = await login(data.email, data.password);
+      
+      // Check if user is admin and redirect accordingly
+      if (response.user.isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Login failed. Please try again.');
     } finally {

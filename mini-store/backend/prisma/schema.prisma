@@ -18,6 +18,7 @@ model User {
   email     String   @unique
   password  String
   walletBalance Decimal @default(1000.00) // Initial $1000 credit
+  isAdmin   Boolean  @default(false) // Admin flag for dashboard access
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

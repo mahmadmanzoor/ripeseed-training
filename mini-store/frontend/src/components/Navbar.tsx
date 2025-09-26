@@ -63,67 +63,101 @@ const Navbar = () => {
             </div>
           </Link>
 
-          {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link
-              to="/products"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive('/products')
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              🛍️ Products
-            </Link>
-            
-            <Link
-              to="/orders"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive('/orders')
-                  ? 'bg-green-100 text-green-700'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              📦 Orders
-            </Link>
-            
-            <Link
-              to="/gifts"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive('/gifts')
-                  ? 'bg-purple-100 text-purple-700'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              🎁 Gifts
-            </Link>
+          {/* Navigation Links - Hide regular links for admin users */}
+          {!user?.isAdmin && (
+            <div className="hidden md:flex items-center space-x-8">
+              <Link
+                to="/products"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive('/products')
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                🛍️ Products
+              </Link>
+              
+              <Link
+                to="/orders"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive('/orders')
+                    ? 'bg-green-100 text-green-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                📦 Orders
+              </Link>
+              
+              <Link
+                to="/gifts"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive('/gifts')
+                    ? 'bg-purple-100 text-purple-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                🎁 Gifts
+              </Link>
 
-            {/* Credit Transfer History */}
-            <Link
-              to="/credit-transfers"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive('/credit-transfers')
-                  ? 'bg-green-100 text-green-700'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              💸 Transfer History
-            </Link>
-          </div>
+              {/* Credit Transfer History */}
+              <Link
+                to="/credit-transfers"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive('/credit-transfers')
+                    ? 'bg-green-100 text-green-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                💸 Transfer History
+              </Link>
+            </div>
+          )}
+
+          {/* Admin Dashboard - Only show for admin users */}
+          {user?.isAdmin && (
+            <div className="hidden md:flex items-center space-x-8">
+              <Link
+                to="/admin"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive('/admin')
+                    ? 'bg-red-100 text-red-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                🛡️ Admin Dashboard
+              </Link>
+            </div>
+          )}
 
           {/* User Info & Actions */}
           <div className="flex items-center space-x-4">
-            {/* Wallet Balance */}
-            <div className="hidden sm:block bg-green-50 px-3 py-2 rounded-lg border border-green-200">
-              <div className="flex items-center space-x-2">
-                <span className="text-green-600 text-sm font-medium">💰</span>
-                <span className="text-sm text-green-800 font-medium">
-                  ${Number(user?.walletBalance || 0).toFixed(2)}
-                </span>
+            {/* Wallet Balance - Only show for regular users */}
+            {!user?.isAdmin && (
+              <div className="hidden sm:block bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+                <div className="flex items-center space-x-2">
+                  <span className="text-green-600 text-sm font-medium">💰</span>
+                  <span className="text-sm text-green-800 font-medium">
+                    ${Number(user?.walletBalance || 0).toFixed(2)}
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Logout Button */}
+            {/* Admin Badge - Only show for admin users */}
+            {user?.isAdmin && (
+              <div className="hidden sm:block bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+                <div className="flex items-center space-x-2">
+                  <span className="text-red-600 text-sm font-medium">🛡️</span>
+                  <span className="text-sm text-red-800 font-medium">
+                    Admin
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Logout Button - Always visible for authenticated users */}
+          <div className="flex items-center">
             <button
               onClick={logout}
               className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors text-sm font-medium"
@@ -135,56 +169,94 @@ const Navbar = () => {
 
         {/* Mobile Navigation */}
         <div className="md:hidden border-t border-gray-200 pt-4 pb-4">
-          <div className="grid grid-cols-2 gap-2">
-            <Link
-              to="/products"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors text-center ${
-                isActive('/products')
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              🛍️ Products
-            </Link>
-            
-            <Link
-              to="/orders"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors text-center ${
-                isActive('/orders')
-                  ? 'bg-green-100 text-green-700'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              📦 Orders
-            </Link>
-            
-            <Link
-              to="/gifts"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors text-center ${
-                isActive('/gifts')
-                  ? 'bg-purple-100 text-purple-700'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              🎁 Gifts
-            </Link>
+          {!user?.isAdmin ? (
+            <div className="grid grid-cols-2 gap-2">
+              <Link
+                to="/products"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors text-center ${
+                  isActive('/products')
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                🛍️ Products
+              </Link>
+              
+              <Link
+                to="/orders"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors text-center ${
+                  isActive('/orders')
+                    ? 'bg-green-100 text-green-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                📦 Orders
+              </Link>
+              
+              <Link
+                to="/gifts"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors text-center ${
+                  isActive('/gifts')
+                    ? 'bg-purple-100 text-purple-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                🎁 Gifts
+              </Link>
 
-            <Link
-              to="/credit-transfers"
-              className="px-3 py-2 rounded-md text-sm font-medium transition-colors text-center text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-            >
-              💸 Transfer History
-            </Link>
-          </div>
-          
-          {/* Mobile Wallet Balance */}
-          <div className="mt-3 bg-green-50 px-3 py-2 rounded-lg border border-green-200 text-center">
-            <div className="flex items-center justify-center space-x-2">
-              <span className="text-green-600 text-sm font-medium">💰</span>
-              <span className="text-sm text-green-800 font-medium">
-                Wallet: ${Number(user?.walletBalance || 0).toFixed(2)}
-              </span>
+              <Link
+                to="/credit-transfers"
+                className="px-3 py-2 rounded-md text-sm font-medium transition-colors text-center text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+              >
+                💸 Transfer History
+              </Link>
             </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-2">
+              <Link
+                to="/admin"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors text-center ${
+                  isActive('/admin')
+                    ? 'bg-red-100 text-red-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                🛡️ Admin Dashboard
+              </Link>
+            </div>
+          )}
+          
+          {/* Mobile User Info */}
+          <div className="mt-3 text-center">
+            {!user?.isAdmin ? (
+              <div className="bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+                <div className="flex items-center justify-center space-x-2">
+                  <span className="text-green-600 text-sm font-medium">💰</span>
+                  <span className="text-sm text-green-800 font-medium">
+                    Wallet: ${Number(user?.walletBalance || 0).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+                <div className="flex items-center justify-center space-x-2">
+                  <span className="text-red-600 text-sm font-medium">🛡️</span>
+                  <span className="text-sm text-red-800 font-medium">
+                    Admin User
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile Logout Button */}
+          <div className="mt-3 text-center">
+            <button
+              onClick={logout}
+              className="w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors text-sm font-medium"
+            >
+              Logout
+            </button>
           </div>
         </div>
       </div>

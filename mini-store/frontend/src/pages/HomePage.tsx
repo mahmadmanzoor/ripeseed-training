@@ -1,13 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../contexts/AuthContext';
 import CreditTransferModal from '../components/CreditTransferModal';
 import Navbar from '../components/Navbar';
 
 const HomePage = () => {
   const { user, isAuthenticated, logout, transferCredits } = useAuthContext();
+  const navigate = useNavigate();
   const [isCreditTransferModalOpen, setIsCreditTransferModalOpen] = useState(false);
   const [transferLoading, setTransferLoading] = useState(false);
   const [transferMessage, setTransferMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  // Redirect admin users to admin dashboard
+  useEffect(() => {
+    if (isAuthenticated && user?.isAdmin) {
+      navigate('/admin');
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleCreditTransfer = () => {
     if (!user) {

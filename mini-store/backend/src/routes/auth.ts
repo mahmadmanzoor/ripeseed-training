@@ -46,7 +46,8 @@ router.post('/register', async (request, response) => {
       user: {
         id: newUser.id,
         email: newUser.email,
-        walletBalance: Number(newUser.walletBalance)
+        walletBalance: Number(newUser.walletBalance),
+        isAdmin: newUser.isAdmin
       }
     });
   } catch (error) {
@@ -92,7 +93,8 @@ router.post('/login', async (request, response) => {
       user: {
         id: user.id,
         email: user.email,
-        walletBalance: Number(user.walletBalance)
+        walletBalance: Number(user.walletBalance),
+        isAdmin: user.isAdmin
       }
     });
   } catch (error) {
@@ -579,12 +581,14 @@ router.post('/transfer-credits', authenticateToken, async (request: Authenticate
       sender: {
         id: result.sender.id,
         email: result.sender.email,
-        walletBalance: Number(result.sender.walletBalance)
+        walletBalance: Number(result.sender.walletBalance),
+        isAdmin: result.sender.isAdmin
       },
       recipient: {
         id: result.recipient.id,
         email: result.recipient.email,
-        walletBalance: Number(result.recipient.walletBalance)
+        walletBalance: Number(result.recipient.walletBalance),
+        isAdmin: result.recipient.isAdmin
       }
     });
 
